@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Check the DebConf Installed or Not
 function checkDebconfigInstalled () {
     sudo dpkg -s debconf-utils 2>> /dev/null >> /dev/null
     local CHECKDEBCONFINSTALLED=$?
@@ -16,7 +17,7 @@ function checkDebconfigInstalled () {
 }
 
 
-
+# Install DebConf-utils 
 function installDebconf () {
     sudo apt install -y debconf-utils 2>> /dev/null >> /dev/null
     local DEBCONFIGINSTALLSTATUS=$?
@@ -34,6 +35,7 @@ function installDebconf () {
     fi
 }
 
+# Check the Mysql Database Server is Installed or Not
 function checkMysqlInstalled () {
      sudo dpkg -s mysql-server-8.0 2>> /dev/null >> /dev/null
      local CHECKMYSQLSTATUS=$?
@@ -48,6 +50,7 @@ function checkMysqlInstalled () {
      fi
 }
 
+# Install Mysql Database Server
 function installMysql () {
      sudo apt install -y mysql-server-8.0 2>> /dev/null >> /dev/null
      local MYSQLINSTALLSTATUS=$?
@@ -62,6 +65,15 @@ function installMysql () {
      fi
 }
 
+function runSecureInstall () {
+
+}
+
+function addBindAddress () {
+sudo sed -i "/^#bind-address/d" /etc/mysql/mysql.conf.d/mysqld.cnf
+sudo sed -i "/^bind-address/d" /etc/mysql/mysql.conf.d/mysqld.cnf
+echo "bind-address=0.0.0.0" >> /etc/mysql/mysql.conf.d/mysqld.cnf
+}
 
 # Main 
 checkDebconfigInstalled
