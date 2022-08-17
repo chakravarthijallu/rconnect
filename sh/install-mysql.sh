@@ -106,6 +106,14 @@ else
    then
       echo "PLEASE INSTALL MYSQL SERVER"
       installMysql
+      MYSQLINSTALLSTATUS2=$?
+      if [ $MYSQLINSTALLSTATUS2 -ne 0 ]
+      then
+         echo "MYSQL SERVER IS NOT INSTALLED PROPERLY"
+         exit
+      else
+         echo "MYSQL SERVER INSTALLED SUCCESSFULLY"
+      fi
    else
       echo "MYSQL IS ALREADY INSTALLED"
    fi
