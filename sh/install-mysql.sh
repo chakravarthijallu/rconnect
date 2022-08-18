@@ -66,6 +66,14 @@ function installMysql () {
 }
 
 function runSecureInstall () {
+	./noninteractive.sh
+	local SECUREINSTALLSTATUS=$?
+	if [ $SECUREINSTALLSTATUS -ne 0 ]
+	then
+		return 5
+	else
+		return 0
+	fi
 
 }
 
@@ -73,6 +81,10 @@ function addBindAddress () {
 sudo sed -i "/^#bind-address/d" /etc/mysql/mysql.conf.d/mysqld.cnf
 sudo sed -i "/^bind-address/d" /etc/mysql/mysql.conf.d/mysqld.cnf
 echo "bind-address=0.0.0.0" >> /etc/mysql/mysql.conf.d/mysqld.cnf
+}
+
+function addUser () {
+	sudo mysql -uroot -proot < add-user.sql
 }
 
 # Main 
@@ -118,3 +130,34 @@ else
       echo "MYSQL IS ALREADY INSTALLED"
    fi
 fi
+
+runSecureInstall
+SECUREINSTALLSTATUS=$?
+if [ $SECUREINSTALLSTATUS -ne 0 ]
+then
+     echo "MYSQL SECURE INSTALLATION IS NOT CONFIGURED PROPERLY"
+     exit
+else
+     echo "MYSQL SECURE INSTALLATION IS SUCCESSFULL"
+fi
+
+addBindAddress
+BINDADDRESSSTATUS=$?
+if [ $BINDADDRESSSTATUS -ne 0 ]
+then
+	echo "BIND ADDRESS IS NOT FAILED"
+	exit
+else
+	echo "BIND ADDRESS IS SUCCESSFULL"
+fi
+
+addUser
+ADDUSERSTATUS=$?
+if [ $ADDUSERSTATUS -ne 0 ]
+then
+	echo "USER IS ALREADY THERE"
+else
+	echo "USER IS ADDED SUCCESSFULLY"
+fi
+
+
