@@ -19,7 +19,8 @@ function checkDebconfigInstalled () {
 
 # Install DebConf-utils 
 function installDebconf () {
-    sudo apt install -y debconf-utils 2>> /dev/null >> /dev/null
+    sudo apt update -y
+    sudo apt install -y debconf-utils 2>> /dev/null
     local DEBCONFIGINSTALLSTATUS=$?
     if [ $DEBCONFIGINSTALLSTATUS -ne 0 ]
     then
@@ -52,7 +53,8 @@ function checkMysqlInstalled () {
 
 # Install Mysql Database Server
 function installMysql () {
-     sudo apt install -y mysql-server-8.0 2>> /dev/null >> /dev/null
+     sudo apt update -y
+     sudo apt install -y mysql-server-8.0 2>> /dev/null
      local MYSQLINSTALLSTATUS=$?
      if [ $MYSQLINSTALLSTATUS -ne 0 ]
      then
@@ -66,6 +68,7 @@ function installMysql () {
 }
 
 function runSecureInstall () {
+	sudo apt install -y expect
 	./noninteractive.sh
 	local SECUREINSTALLSTATUS=$?
 	if [ $SECUREINSTALLSTATUS -ne 0 ]
@@ -78,14 +81,39 @@ function runSecureInstall () {
 }
 
 function addBindAddress () {
-sudo sed -i "/^#bind-address/d" /etc/mysql/mysql.conf.d/mysqld.cnf
-sudo sed -i "/^bind-address/d" /etc/mysql/mysql.conf.d/mysqld.cnf
-echo "bind-address=0.0.0.0" >> /etc/mysql/mysql.conf.d/mysqld.cnf
+	sudo sed -i "/^bind-address/ s/127\.0\.0\.1/0\.0\.0\.0/" /etc/mysql/mysql.conf.d/mysqld.cnf
+       	local BINDSTATUS=$?
+	if [ $BINDSTATUS -ne 0 ]
+	then
+		return 6
+	else
+		return 0
+	fi
 }
 
 function addUser () {
-	sudo mysql -uroot -proot < add-user.sql
+	sudo mysql -uroot -proot < add-user.sql 2>> /dev/null
+	local USERSTATUS=$?
+	if [ $USERSTATUS -ne 0 ]
+	then
+		return 7
+	else
+		return 0
+	fi
 }
+
+
+function createDBSchema () {
+	sudo mysql -urconnectuser -pwelcome1 < dbschema.sql 2>> /dev/null
+	local DBSTATUS=$?
+	if [ $DBSTATUS -ne 0 ]
+	then
+		return 8
+	else
+		return 0
+	fi
+}
+
 
 # Main 
 checkDebconfigInstalled
@@ -149,6 +177,7 @@ then
 	exit
 else
 	echo "BIND ADDRESS IS SUCCESSFULL"
+	sudo systemctl restart mysql
 fi
 
 addUser
@@ -160,4 +189,11 @@ else
 	echo "USER IS ADDED SUCCESSFULLY"
 fi
 
-
+createDBSchema
+CREATEDBSCHEMASTATUS=$?
+if [ $CREATEDBSCHEMASTATUS -ne 0 ]
+then
+	echo "DB SCHEMA IS ALREADY THERE"
+else
+	echo "DB SCHEMA IS ADDED SUCCESSFULLY"
+fi
