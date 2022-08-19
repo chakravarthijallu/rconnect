@@ -1,5 +1,28 @@
 #!/bin/bash
 
+function checkOpenJdk () {
+        sudo dpkg -s openjdk-11-jdk
+	local CHECKJDK=$?
+	if [ $CHECKJDK -ne 0 ]
+	then
+		return 4
+	else
+		return 0
+	fi
+}
+
+function installJdk () {
+	sudo apt update -y
+	sudo apt install -y openjdk-11-jdk
+	local INSTALLJDK=$?
+	if [ $INSTALLJDK -ne 0 ]
+	then
+		return 5
+	else
+		return 0
+	fi
+}
+
 function checkTomcatServer () {
 	find "/home/ubuntu" -type d -name "*apache-tomcat*" | grep -i "apache-tomcat"
 	local CHECKTOMCATSERVER=$?
@@ -41,6 +64,24 @@ function deployWarFile () {
 }
 
 # main method
+checkOpenJdk
+CHECKOPENJDKSTATUS=$?
+if [ $CHECKOPENJDKSTATUS -ne 0 ]
+then
+	echo "Jdk Software is not installed"
+	installJdk
+	INSTALLJDKSTATUS=$?
+	if [ $INSTALLJDKSTATUS -ne 0 ]
+	then
+		echo "Jdk Software is not installed properly."
+		exit
+	else
+		echo "Jdk Software is installed successfully."
+	fi
+else
+	echo "Jdk Software is installed"
+fi
+
 checkTomcatServer
 CHECKTOMCATSERVERSTATUS=$?
 if [ $CHECKTOMCATSERVERSTATUS -ne 0 ]
