@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function checkOpenJdk () {
-        sudo dpkg -s openjdk-11-jdk
+        sudo dpkg -s openjdk-11-jdk 2>> /dev/null
 	local CHECKJDK=$?
 	if [ $CHECKJDK -ne 0 ]
 	then
@@ -12,8 +12,8 @@ function checkOpenJdk () {
 }
 
 function installJdk () {
-	sudo apt update -y
-	sudo apt install -y openjdk-11-jdk
+	sudo apt update -y 2>> /dev/null
+	sudo apt install -y openjdk-11-jdk 2>> /dev/null
 	local INSTALLJDK=$?
 	if [ $INSTALLJDK -ne 0 ]
 	then
@@ -24,7 +24,7 @@ function installJdk () {
 }
 
 function checkTomcatServer () {
-	find "/home/ubuntu" -type d -name "*apache-tomcat*" | grep -i "apache-tomcat"
+	find "/home/ubuntu" -type d -name "*apache-tomcat*" | grep -i "apache-tomcat" 2>> /dev/null
 	local CHECKTOMCATSERVER=$?
 	if [ $CHECKTOMCATSERVER -ne 0 ]
 	then
@@ -35,8 +35,9 @@ function checkTomcatServer () {
 }
 
 
+
 function installTomcatServer () {
-	wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.65/bin/apache-tomcat-9.0.65.tar.gz
+	wget -O /home/ubuntu/apache-tomcat-9.0.65.tar.gz https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.65/bin/apache-tomcat-9.0.65.tar.gz 2>> /dev/null
 	local INSTALLTOMCATSERVER=$?
 	if [ $INSTALLTOMCATSERVER -ne 0 ]
 	then
@@ -46,10 +47,15 @@ function installTomcatServer () {
 	fi
 }
 
-function checkAndDeleteWarFile () {
-	find "apache-tomcat-9.0.65/webapps" -name "*rconnect*" -exec rm -rf {} \;
-
+function extractApacheTomcat () {
+	tar -xzvf /home/ubuntu/apache-tomcat-9.0.65.tar.gz -C /home/ubuntu/ 2>> /dev/null
+	rm -f /home/ubuntu/apache-tomcat-9.0.65.tar.gz
 }
+
+function checkAndDeleteWarFile () {
+	find "/home/ubuntu/apache-tomcat-9.0.65/webapps" -name "*rconnect*" -exec rm -rf {} \;
+}
+
 
 function deployWarFile () {
 	sudo cp /vagrant/build/dist/rconnect.war /home/ubuntu/apache-tomcat-9.0.65/webapps/
@@ -95,8 +101,9 @@ then
 		exit
 	else
 		echo "Tomcat Server is Installed Successfully"
+		extractApacheTomcat
 else
-	echo "Tomcat server is Installed"
+	echo "Apache Tomcat Server is Already Available."
 fi
 
 
