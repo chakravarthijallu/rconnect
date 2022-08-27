@@ -24,7 +24,7 @@ function installJdk () {
 }
 
 function checkTomcatServer () {
-	find "/home/ubuntu" -type d -name "*apache-tomcat*" | grep -i "apache-tomcat" 2>> /dev/null
+	find "/home/vagrant" -type d -name "*apache-tomcat*" | grep -i "apache-tomcat" 2>> /dev/null
 	local CHECKTOMCATSERVER=$?
 	if [ $CHECKTOMCATSERVER -ne 0 ]
 	then
@@ -37,7 +37,7 @@ function checkTomcatServer () {
 
 
 function installTomcatServer () {
-	wget -O /home/ubuntu/apache-tomcat-9.0.65.tar.gz https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.65/bin/apache-tomcat-9.0.65.tar.gz 2>> /dev/null
+	wget -O /home/vagrant/apache-tomcat-9.0.65.tar.gz https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.65/bin/apache-tomcat-9.0.65.tar.gz 2>> /dev/null
 	local INSTALLTOMCATSERVER=$?
 	if [ $INSTALLTOMCATSERVER -ne 0 ]
 	then
@@ -48,18 +48,19 @@ function installTomcatServer () {
 }
 
 function extractApacheTomcat () {
-	tar -xzvf /home/ubuntu/apache-tomcat-9.0.65.tar.gz -C /home/ubuntu/ 2>> /dev/null
-	rm -f /home/ubuntu/apache-tomcat-9.0.65.tar.gz
+	tar -xzvf /home/vagrant/apache-tomcat-9.0.65.tar.gz -C /home/vagrant/ 2>> /dev/null
+	rm -f /home/vagrant/apache-tomcat-9.0.65.tar.gz
 }
 
 function checkAndDeleteWarFile () {
-	find "/home/ubuntu/apache-tomcat-9.0.65/webapps" -name "*rconnect*" -exec rm -rf {} \;
+	find "/home/vagrant/apache-tomcat-9.0.65/webapps" -name "*rconnect*" -exec rm -rf {} \;
 }
 
 
 function deployWarFile () {
-	sudo cp /vagrant/build/dist/rconnect.war /home/ubuntu/apache-tomcat-9.0.65/webapps/
-	./startup.sh
+	cp /vagrant/target/rconnect.war /home/vagrant/apache-tomcat-9.0.65/webapps/
+	sudo chown vagrant:vagrant /home/vagrant/apache-tomcat-9.0.65/webapps/rconnect.war
+	/home/vagrant/apache-tomcat-9.0.65/bin/startup.sh
 	local FILEDEPLOY=$?
 	if [ $FILEDEPLOY -ne 0 ]
 	then
@@ -102,6 +103,7 @@ then
 	else
 		echo "Tomcat Server is Installed Successfully"
 		extractApacheTomcat
+	fi
 else
 	echo "Apache Tomcat Server is Already Available."
 fi

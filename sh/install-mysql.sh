@@ -69,7 +69,7 @@ function installMysql () {
 
 function runSecureInstall () {
 	sudo apt install -y expect
-	./noninteractive.sh
+	/vagrant/provisioners/sh/noninteractive.sh
 	local SECUREINSTALLSTATUS=$?
 	if [ $SECUREINSTALLSTATUS -ne 0 ]
 	then
@@ -92,7 +92,7 @@ function addBindAddress () {
 }
 
 function addUser () {
-	sudo mysql -uroot -proot < add-user.sql 2>> /dev/null
+	sudo mysql -uroot -proot < /vagrant/provisioners/sh/add-user.sql 2>> /dev/null
 	local USERSTATUS=$?
 	if [ $USERSTATUS -ne 0 ]
 	then
@@ -104,7 +104,7 @@ function addUser () {
 
 
 function createDBSchema () {
-	sudo mysql -urconnectuser -pwelcome1 < dbschema.sql 2>> /dev/null
+	sudo mysql -urconnectuser -pwelcome1 < /vagrant/src/main/db/db-schema.sql 2>> /dev/null
 	local DBSTATUS=$?
 	if [ $DBSTATUS -ne 0 ]
 	then
@@ -159,6 +159,7 @@ else
    fi
 fi
 
+: '
 runSecureInstall
 SECUREINSTALLSTATUS=$?
 if [ $SECUREINSTALLSTATUS -ne 0 ]
@@ -168,6 +169,7 @@ then
 else
      echo "MYSQL SECURE INSTALLATION IS SUCCESSFULL"
 fi
+'
 
 addBindAddress
 BINDADDRESSSTATUS=$?
@@ -193,7 +195,7 @@ createDBSchema
 CREATEDBSCHEMASTATUS=$?
 if [ $CREATEDBSCHEMASTATUS -ne 0 ]
 then
-	echo "DB SCHEMA IS ALREADY THERE"
+	echo "DB SCHEMA IS NOT ADDED"
 else
 	echo "DB SCHEMA IS ADDED SUCCESSFULLY"
 fi
